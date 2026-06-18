@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BigQuery Release Notes</title>
+  <meta name="description" content="Browse the latest Google BigQuery release notes and share them on Twitter/X." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <div class="app-wrapper">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-header__logo">
+        <span class="app-header__icon">📋</span>
+        <h1>BigQuery Release Notes</h1>
+      </div>
+      <p>Stay up to date with the latest BigQuery changes &amp; share them with your network.</p>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar__left">
+        <button id="btn-refresh" class="btn btn--primary" type="button">
+          <span class="spinner"></span>
+          <span class="btn__label">Refresh</span>
+        </button>
+        <span id="note-count" class="toolbar__count"></span>
+      </div>
+      <button id="btn-tweet" class="btn btn--tweet" type="button" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+        <span>Tweet</span>
+      </button>
+    </div>
+
+    <!-- Feed container -->
+    <section id="feed" class="feed-list" aria-live="polite"></section>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
