@@ -191,6 +191,22 @@ body::before {
   pointer-events: none;
 }
 
+.btn--secondary {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.btn--secondary:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-active);
+  transform: translateY(-1px);
+}
+.btn--secondary:disabled {
+  opacity: .4;
+  pointer-events: none;
+}
+
+
 /* ── Spinner ───────────────────────────────── */
 .spinner {
   width: 18px;
@@ -281,6 +297,34 @@ body::before {
   color: #fff;
   border-color: var(--accent);
 }
+
+.card__actions {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.card__btn {
+  font-family: inherit;
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  padding: .25rem .6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all .25s var(--ease);
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+}
+.card__btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
 
 .card__body {
   color: var(--text-secondary);

@@ -8,9 +8,11 @@
   // ── DOM refs ──────────────────────────────
   const feedEl     = document.getElementById("feed");
   const refreshBtn = document.getElementById("btn-refresh");
+  const exportBtn  = document.getElementById("btn-export");
   const tweetBtn   = document.getElementById("btn-tweet");
   const countEl    = document.getElementById("note-count");
   const toastEl    = document.getElementById("toast");
+
 
   // ── State ─────────────────────────────────
   let entries = [];
@@ -26,7 +28,9 @@
   function setLoading(loading) {
     refreshBtn.classList.toggle("btn--loading", loading);
     refreshBtn.disabled = loading;
+    exportBtn.disabled = loading || entries.length === 0;
   }
+
 
   /** Assign a tag class to <h3> headings inside card bodies. */
   function tagifyHeadings(html) {
@@ -88,6 +92,7 @@
   function renderCards() {
     feedEl.innerHTML = "";
     countEl.innerHTML = `<strong>${entries.length}</strong> release note${entries.length !== 1 ? "s" : ""}`;
+    exportBtn.disabled = entries.length === 0;
 
     entries.forEach((entry) => {
       const card = document.createElement("article");
@@ -98,16 +103,29 @@
         <span class="card__check">${entry.id === selectedId ? "✓" : ""}</span>
         <div class="card__header">
           <span class="card__date">${entry.display_date}</span>
-          <a class="card__link" href="${entry.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
-            View in docs ↗
-          </a>
+          <div class="card__actions">
+            <button class="card__btn card__btn--copy" title="Skopiuj do schowka">
+              <span>📋</span> <span class="copy-label">Skopiuj</span>
+            </button>
+            <a class="card__link" href="${entry.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+              View in docs ↗
+            </a>
+          </div>
         </div>
         <div class="card__body">${tagifyHeadings(entry.content)}</div>`;
+
+      // Copy to clipboard listener
+      const copyBtn = card.querySelector(".card__btn--copy");
+      copyBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        copyToClipboard(entry, copyBtn);
+      });
 
       card.addEventListener("click", () => toggleSelection(entry.id));
       feedEl.appendChild(card);
     });
   }
+
 
   // ── Selection ─────────────────────────────
   function toggleSelection(id) {
@@ -137,6 +155,59 @@
     window.open(intentUrl, "_blank", "noopener,width=600,height=460");
     showToast("Tweet window opened!");
   }
+
+  // ── Clipboard & CSV ───────────────────────
+  async function copyToClipboard(entry, btnEl) {
+    const plain = stripHtml(entry.content);
+    const textToCopy = `BigQuery Release Notes – ${entry.display_date}\n\n${plain}\n\nDokumentacja: ${entry.link}`;
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      const labelEl = btnEl.querySelector(".copy-label");
+      const originalText = labelEl.textContent;
+      labelEl.textContent = "Skopiowano!";
+      btnEl.style.borderColor = "var(--green)";
+      btnEl.style.color = "var(--green)";
+      showToast("Skopiowano do schowka!");
+      setTimeout(() => {
+        labelEl.textContent = originalText;
+        btnEl.style.borderColor = "";
+        btnEl.style.color = "";
+      }, 2000);
+    } catch (err) {
+      showToast("Nie udało się skopiować: " + err.message);
+    }
+  }
+
+  function exportToCSV() {
+    if (entries.length === 0) return;
+
+    const headers = ["Date", "URL", "Content (Plain Text)"];
+    const rows = entries.map(entry => [
+      entry.display_date,
+      entry.link,
+      stripHtml(entry.content)
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(value => {
+        const escaped = String(value).replace(/"/g, '""');
+        return `"${escaped}"`;
+      }).join(","))
+    ].join("\r\n");
+
+    // Use BOM for Excel UTF-8 support
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `bigquery_release_notes_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Wyeksportowano plik CSV!");
+  }
+
 
   // ── Fetch ─────────────────────────────────
   async function fetchNotes() {
@@ -170,8 +241,10 @@
 
   // ── Init ──────────────────────────────────
   refreshBtn.addEventListener("click", fetchNotes);
+  exportBtn.addEventListener("click", exportToCSV);
   tweetBtn.addEventListener("click", tweetSelected);
 
   // Auto-load on page open
   fetchNotes();
 })();
+
