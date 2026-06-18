@@ -68,6 +68,23 @@
       </button>
     </div>
 
+    <!-- Filters & Search -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" placeholder="Filtruj notatki (np. Gemini, embeddings...)" aria-label="Wyszukaj notatki" />
+      </div>
+      <div class="filter-chips">
+        <button class="chip active" data-filter="all" type="button">Wszystkie</button>
+        <button class="chip" data-filter="feature" type="button">Features</button>
+        <button class="chip" data-filter="issue" type="button">Issues</button>
+        <button class="chip" data-filter="announcement" type="button">Announcements</button>
+      </div>
+    </div>
+
     <!-- Feed container -->
     <section id="feed" class="feed-list" aria-live="polite"></section>
 

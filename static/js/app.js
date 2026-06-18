@@ -12,11 +12,15 @@
   const tweetBtn   = document.getElementById("btn-tweet");
   const countEl    = document.getElementById("note-count");
   const toastEl    = document.getElementById("toast");
-
+  const searchInput = document.getElementById("search-input");
+  const filterChips = document.querySelectorAll(".filter-chips .chip");
 
   // ── State ─────────────────────────────────
   let entries = [];
   let selectedId = null;
+  let searchQuery = "";
+  let filterCategory = "all";
+
 
   // ── Helpers ───────────────────────────────
   function showToast(msg, durationMs = 3000) {
@@ -89,15 +93,70 @@
       </div>`;
   }
 
+  function renderEmptySearch() {
+    feedEl.innerHTML = `
+      <div class="state-message">
+        <div class="state-message__icon">🔍</div>
+        <div class="state-message__title">Brak wyników wyszukiwania</div>
+        <p>Spróbuj zmienić wpisane słowa kluczowe lub zaznacz inny filtr.</p>
+      </div>`;
+  }
+
+  /** Check if entry content has a heading containing specific text */
+  function hasCategory(entry, category) {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = entry.content;
+    const h3s = Array.from(tempDiv.querySelectorAll("h3"));
+    return h3s.some(h3 => h3.textContent.trim().toLowerCase().includes(category));
+  }
+
+  function getFilteredEntries() {
+    return entries.filter((entry) => {
+      // 1. Filter by category
+      let matchesCategory = true;
+      if (filterCategory !== "all") {
+        matchesCategory = hasCategory(entry, filterCategory);
+      }
+
+      // 2. Filter by search query
+      let matchesSearch = true;
+      const query = searchQuery.trim().toLowerCase();
+      if (query) {
+        const titleMatch = entry.title.toLowerCase().includes(query);
+        const displayDateMatch = entry.display_date.toLowerCase().includes(query);
+        const contentMatch = stripHtml(entry.content).toLowerCase().includes(query);
+        matchesSearch = titleMatch || displayDateMatch || contentMatch;
+      }
+
+      return matchesCategory && matchesSearch;
+    });
+  }
+
   function renderCards() {
     feedEl.innerHTML = "";
-    countEl.innerHTML = `<strong>${entries.length}</strong> release note${entries.length !== 1 ? "s" : ""}`;
+    const filtered = getFilteredEntries();
+    
+    countEl.innerHTML = `Pokazano <strong>${filtered.length}</strong> z <strong>${entries.length}</strong> wpisów`;
     exportBtn.disabled = entries.length === 0;
 
-    entries.forEach((entry) => {
+    if (filtered.length === 0) {
+      if (entries.length === 0) {
+        renderEmpty();
+      } else {
+        renderEmptySearch();
+      }
+      return;
+    }
+
+    filtered.forEach((entry) => {
       const card = document.createElement("article");
       card.className = "card" + (entry.id === selectedId ? " card--selected" : "");
       card.dataset.entryId = entry.id;
+
+      // Accessibility attributes
+      card.setAttribute("tabindex", "0");
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-pressed", entry.id === selectedId ? "true" : "false");
 
       card.innerHTML = `
         <span class="card__check">${entry.id === selectedId ? "✓" : ""}</span>
@@ -121,10 +180,21 @@
         copyToClipboard(entry, copyBtn);
       });
 
+      // Click to select
       card.addEventListener("click", () => toggleSelection(entry.id));
+
+      // Keydown to select (Accessibility)
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault(); // prevent page scroll
+          toggleSelection(entry.id);
+        }
+      });
+
       feedEl.appendChild(card);
     });
   }
+
 
 
   // ── Selection ─────────────────────────────
@@ -273,7 +343,24 @@
   exportBtn.addEventListener("click", exportToCSV);
   tweetBtn.addEventListener("click", tweetSelected);
 
+  // Search input handler
+  searchInput.addEventListener("input", (e) => {
+    searchQuery = e.target.value;
+    renderCards();
+  });
+
+  // Filter chips handler
+  filterChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      filterChips.forEach((c) => c.classList.remove("active"));
+      chip.classList.add("active");
+      filterCategory = chip.dataset.filter;
+      renderCards();
+    });
+  });
+
   // Auto-load on page open
   fetchNotes();
 })();
+
 
