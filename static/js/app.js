@@ -239,6 +239,35 @@
     }
   }
 
+  // ── Theme Switch ──────────────────────────
+  const themeBtn = document.getElementById("btn-theme-toggle");
+  const sunIcon = themeBtn.querySelector(".theme-icon--sun");
+  const moonIcon = themeBtn.querySelector(".theme-icon--moon");
+
+  function initTheme() {
+    if (localStorage.getItem("theme") === "light") {
+      document.body.classList.add("light-theme");
+      sunIcon.style.display = "none";
+      moonIcon.style.display = "block";
+    }
+  }
+
+  themeBtn.addEventListener("click", () => {
+    const isLight = document.body.classList.toggle("light-theme");
+    if (isLight) {
+      localStorage.setItem("theme", "light");
+      sunIcon.style.display = "none";
+      moonIcon.style.display = "block";
+    } else {
+      localStorage.setItem("theme", "dark");
+      sunIcon.style.display = "block";
+      moonIcon.style.display = "none";
+    }
+  });
+
+  // Run initialization
+  initTheme();
+
   // ── Init ──────────────────────────────────
   refreshBtn.addEventListener("click", fetchNotes);
   exportBtn.addEventListener("click", exportToCSV);

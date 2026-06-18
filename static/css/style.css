@@ -35,6 +35,26 @@
   --ease: cubic-bezier(.4, 0, .2, 1);
 }
 
+body.light-theme {
+  /* Light Palette */
+  --bg-primary:    hsl(220, 20%, 97%);
+  --bg-secondary:  hsl(220, 15%, 92%);
+  --bg-card:       hsla(220, 15%, 100%, .75);
+  --bg-card-hover: hsla(220, 15%, 100%, .95);
+
+  --accent:        hsl(210, 100%, 42%);
+  --accent-dim:    hsl(210, 80%, 32%);
+  --accent-glow:   hsla(210, 100%, 42%, .12);
+
+  --text-primary:  hsl(220, 25%, 12%);
+  --text-secondary:hsl(220, 12%, 35%);
+  --text-muted:    hsl(220, 10%, 55%);
+
+  --border:        hsla(220, 15%, 75%, .6);
+  --border-active: hsla(210, 100%, 42%, .6);
+}
+
+
 /* ── Reset ─────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -60,6 +80,13 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
+
+body.light-theme::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, hsla(210, 100%, 50%, .04), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, hsla(265, 80%, 55%, .03), transparent);
+}
+
 
 /* ── Layout ────────────────────────────────── */
 .app-wrapper {
@@ -474,8 +501,42 @@ body::before {
 /* ── Responsive ────────────────────────────── */
 @media (max-width: 640px) {
   .app-wrapper { padding: 1.25rem 1rem 3rem; }
+  .theme-toggle-container { top: 1rem; right: 1rem; }
   .app-header h1 { font-size: 1.35rem; }
   .toolbar { flex-direction: column; align-items: stretch; }
   .toolbar__left { justify-content: center; }
   .card { padding: 1.15rem; }
 }
+
+/* ── Theme Toggle ──────────────────────────── */
+.theme-toggle-container {
+  position: absolute;
+  top: 2rem;
+  right: 1.5rem;
+  z-index: 10;
+}
+
+.theme-toggle-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all .25s var(--ease);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-active);
+  transform: scale(1.05);
+}
+
+.theme-toggle-btn svg {
+  display: block;
+}
+
